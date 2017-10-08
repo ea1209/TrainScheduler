@@ -183,36 +183,27 @@ $('#add-train').on("click" , function (event) {
 
 });
 
-database.ref().
-	orderByChild("dateAdded").limitToLast(1).on("child_added", function(snapshot)  {
-		var sv = snapshot.val();
+database.ref().on("child_added", function(childSnapshot, prevChildKey) {
 
+		var sv = childSnapshot.val();
 		console.log(sv);
+		
+		var firebasetrainName = sv.trainName;
+		var firbasedestination = sv.destination;
+		var firebasetrainTime = sv.trainTime;
+		var firebasefrequency = sv.frequency;
 
-		var firebasetrainName = snapshot.val().trainName;
-		var firbasedestination = snapshot.val().destination;
-		var firebasetrainTime = snapshot.val().trainTime;
-		var firebasefrequency =
-			snapshot.val().frequency;
+      	var trainArr = firebasetrainTime.split(":");
+      	var trainTime = moment().hours(trainArr[0]).minutes(trainArr[1]);
+      	var minutes;
+      	var arrival;
+        var differenceInTime = moment().diff(trainTime, "minutes");
+        var remainder = differenceInTime % firebasefrequency;
+        minutes = firebasefrequency - remainder;
+        arrival = moment().add(minutes, "m").format("hh:mm A");
 
-
-
-		var minAway = moment().diff(moment.unix(firebasetrainTime), "minutes") % firebasefrequency;
-
-		var minutes = firebasefrequency - minAway;
-
-		var nextTrainArrival = moment().add(minutes, "m").format("hh:mm A");
-
-		var test = nextTrainArrival + firebasefrequency;
-		console.log(test);
-
-		var currentTime = 
-			moment().add(minutes, "m").format("hh:mm A");
-
-		console.log(minutes);
-
-
-		$('#trainSchedule > tbody').prepend("<tr><td>" + trainName + "</td><td>" + destination +"</td><td>" + frequency +"</td><td>" + nextTrainArrival + "</td><td>" + minutes +"</td></tr>")
+	
+		$('#trainSchedule > tbody').prepend("<tr><td>" + firebasetrainName + "</td><td>" + firbasedestination +"</td><td>" + firebasefrequency +"</td><td>" + arrival + "</td><td>" + minutes +"</td></tr>")
 
 	});
 
